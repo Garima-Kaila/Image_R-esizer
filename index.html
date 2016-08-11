@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Resizer</title>
+    <style>
+        .header {
+            float: left;
+        }
+
+        .dvDestination {
+            margin-top: 80px;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+<div class="header"><h1 style="color:green">Image resizer Demo</h1>
+</div>
+
+<div class="leftPanel">
+    <a onclick="drawCircle()">Circle</a><br>
+    <a onclick="drawRectangle()">Rectangle</a>
+</div>
+<div class="rightPanel">
+    <canvas id="canImageResize" width="500" height="500"  style="border:1px solid"></canvas>
+</div>
+<script src="js/shape.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

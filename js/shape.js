@@ -45,6 +45,12 @@ Shape.prototype.draw = function (withAnchors) {
         drawDragAnchor((this.x + this.w), (this.y + this.h));
         drawDragAnchor(this.x, (this.y + this.h));
     }
+
+    if(this.isSelected)
+    {
+        this.selectShape();
+    }
+
 };
 
 /**

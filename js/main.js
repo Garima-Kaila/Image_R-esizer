@@ -48,8 +48,7 @@ function drawRectangle() {
     rect.img = imgRect;
     shapes.push(rect);
 }
-var startX;
-var startY;
+
 /**
  * Draw shapes
  *
@@ -60,11 +59,9 @@ function drawShape() {
     for (var idx = 0; idx < shapes.length; idx++) {
         var shape = shapes[idx]
         shape.draw(true);
-      
-
 
     }
-
+    // call the drawShape function again!
     requestAnimationFrame(drawShape);
 }
 drawShape();
@@ -109,12 +106,12 @@ function onMouseDownHandler(evnt) {
         }
 
         shape.unselectShape();
-        this.isSelected=false;
+        shape.isSelected = false;
 
         }
     if (shapeMoveObj != null) {
         shapeMoveObj.selectShape();
-        this.isSelected = true;
+        shapeMoveObj.isSelected = true;
     }
 }
 
@@ -185,13 +182,3 @@ function onMouseOutHandler(evnt) {
 }
 
 
-var canvasData = canvas.toDataURL();
-
-localStorage.setItem('data', canvasData);
-
-var savedData = localStorage.getItem('data');
-if(savedData != undefined && savedData!=null) {
-    var img = new Image();
-    img.src = savedData;
-    ctx.drawImage(img, 50,50);
-}

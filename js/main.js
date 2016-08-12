@@ -13,6 +13,9 @@ imgCircle.src = "./images/circle.png";
 
 var imgRect = new Image();
 imgRect.src = "./images/rect.png";
+
+var imgTrang = new Image();
+imgTrang.src = "./images/triangle.png";
 var offsetLeftX = canvas.offsetLeft;
 var offsetTopY = canvas.offsetTop;
 var shapeMoveObj = null;
@@ -36,9 +39,9 @@ function drawCircle() {
 
 }
 /**
- * used to draw rectangle on the canvas
- *
- */
+* used to draw rectangle on the canvas
+*
+*/
 function drawRectangle() {
     var rect = new Shape();
     rect.x = 100 * Math.random();
@@ -50,6 +53,20 @@ function drawRectangle() {
 }
 
 /**
+ * used to draw triangle on the canvas
+ *
+ */
+function drawTriangle() {
+    var trang = new Shape();
+    trang.x = 100 * Math.random();
+    trang.y = 100 * Math.random();
+    trang.w = 100 * Math.random();
+    trang.h = 100 * Math.random();
+    trang.img = imgTrang;
+    shapes.push(trang);
+}
+
+/**
  * Draw shapes
  *
  */
@@ -58,13 +75,53 @@ function drawShape() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var idx = 0; idx < shapes.length; idx++) {
         var shape = shapes[idx]
-        shape.draw(true);
+        shape.draw();
 
     }
     // call the drawShape function again!
     requestAnimationFrame(drawShape);
 }
 drawShape();
+
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+/**
+ * Used to drag Image from left image tool panel
+ *
+ */
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+
+}
+
+/**
+ * Used to drop Image on canvas
+ *
+ */
+function drop(ev) {
+    ev.preventDefault();
+    data = ev.dataTransfer.getData("text");
+
+    //for rectangle
+    if (data === "rectangle") {
+        drawRectangle();
+    }
+    //for circle
+    else if (data === "circle") {
+        drawCircle();
+    }
+
+    //for triangle
+    else if (data === "triangle") {
+        drawTriangle();
+    }
+
+    ev.target.appendChild(document.getElementById(data));
+}
 
 /**
  * used to draw drag anchor at four corners of the shape
@@ -130,6 +187,7 @@ function getPosition(evnt) {
 }
 
 
+
 /**
  * used to handle mousemove event which is binded with canvas
  * @param {event} mouse event
@@ -181,4 +239,18 @@ function onMouseOutHandler(evnt) {
     onMouseUpHandler(evnt);
 }
 
+// Save canvas' Data as a data URL
+var canData = canvas.toDataURL();
 
+//sore data in local storage
+localStorage.setItem('data', canData);
+
+
+var savedData = localStorage.getItem('data');
+if(savedData != undefined && savedData!=null) {
+    var img= new Image();
+    img.src = savedData;
+    ctx.drawImage(img,550,500);
+
+
+}

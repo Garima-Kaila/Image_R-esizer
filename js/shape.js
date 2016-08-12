@@ -36,19 +36,17 @@ function Shape() {
 /**
  * use to draw image on canvas
  */
-Shape.prototype.draw = function (withAnchors) {
+Shape.prototype.draw = function () {
     ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-
-    if (withAnchors) {
-        drawDragAnchor(this.x, this.y);
-        drawDragAnchor((this.x + this.w), this.y);
-        drawDragAnchor((this.x + this.w), (this.y + this.h));
-        drawDragAnchor(this.x, (this.y + this.h));
-    }
 
     if(this.isSelected)
     {
         this.selectShape();
+        drawDragAnchor(this.x, this.y);
+        drawDragAnchor((this.x + this.w), this.y);
+        drawDragAnchor((this.x + this.w), (this.y + this.h));
+        drawDragAnchor(this.x, (this.y + this.h));
+
     }
 
 };

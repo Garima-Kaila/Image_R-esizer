@@ -4,25 +4,49 @@
     <title>Image Resizer</title>
     <style>
         .header {
+            color: green;
+            text-align: center;
+        }
+
+        .leftPanel {
             float: left;
         }
 
-        .dvDestination {
-            margin-top: 80px;
+        .rightPanel {
             float: right;
+            margin-top: 7px;
+            background-color: #e6eca9;
+        }
+
+        .shapedrag {
+            color: darkorange;
+        }
+
+        .hd {
+            color: green;
+            font-weight: bold;
+            font-size: 40px
         }
     </style>
 </head>
-<body>
-<div class="header"><h1 style="color:green">Image resizer Demo</h1>
+<body background="./images/bg2.jpg" style="border:1px solid">
+<div class="header">
+    <header class="hd">Image Resizer Demo</header>
 </div>
 
 <div class="leftPanel">
-    <a onclick="drawCircle()">Circle</a><br>
-    <a onclick="drawRectangle()">Rectangle</a>
+    <p>
+    <h3>Image Tools</h3></p>
+    <img id="rectangle" src="./images/rect.png" draggable="true" ondragstart="drag(event)"><br>
+    <img id="circle" src="./images/circle.png" draggable="true" ondragstart="drag(event)"><br>
+    <img id="triangle" src="./images/triangle.png" draggable="true" ondragstart="drag(event)">
+
 </div>
 <div class="rightPanel">
-    <canvas id="canImageResize" width="500" height="500"  style="border:1px solid"></canvas>
+    <h3 class="shapedrag">Drag Shapes Here !!</h3>
+    <canvas id="canImageResize" width="800" height="500" style="border:1px solid" ondrop="drop(event)"
+            ondragover="allowDrop(event)">
+    </canvas>
 </div>
 <script src="js/shape.js"></script>
 <script src="js/main.js"></script>

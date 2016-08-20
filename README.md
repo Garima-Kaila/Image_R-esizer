@@ -12,7 +12,7 @@ Understanding:
  Canvas
 
 - Draggin on image
-- dropping image on canva
+- Dropping image on canva
 - Reposition of image with in cavas
 - Resize Image dropped on canvas
 - Remove Image from canvas
@@ -28,6 +28,5 @@ Requirements
 - Canvas coordinate system understaing
 - Local storage understanding
 
-**Approach**
-
-
+**Deployment :**
+Use any webserver to launch index.html.

@@ -1,173 +1,132 @@
 /**
- * Created by garima05 on 07-08-2016.
+ * Created by garima05 on 19-08-2016.
  */
 
 
 /**
- @summary  This class contain image resizer functionality.
- * Different images can be drawn on the canvas from left control panel.Selected image can be
- * resized and repostioned with in canvas  we can remove Image from canvas
- *  and  save all images and canvas state in local storage
- *
- *
- *
- * @access public : draw()
- * @access public : createBorder()
- * @access public : amIClicked()
- * @access public : clearBorder()
- * @access public : anchorHitTest()
- * @access public :resizeShapeFunc
- *
- *
- * @class : Shape
- *
+ * @class Shape
+ * @param obj
+ * @access public:draw();
+ * @constructor
  */
-
 function Shape() {
     this.x = 0;
     this.y = 0;
     this.w = 0;
     this.h = 0;
     this.img = 0;
+    this.draggerSize = 10;
     this.isSelected = false;
-    this.isRemovedShape = false;
+}
+
+/**
+ * used to draw image
+ */
+Shape.prototype.draw = function () {
+    ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
+    if (this.isSelected) {
+        this.shapeSelect();
+        drawDragAnchor(this.x, this.y);
+        drawDragAnchor((this.x + this.w - this.draggerSize), this.y);
+        drawDragAnchor((this.x + this.w - this.draggerSize), (this.y + this.h - this.draggerSize));
+        drawDragAnchor(this.x, (this.y + this.h - this.draggerSize));
+
+    }
 
 }
 
 /**
- * use to draw image on canvas
+ * used to create border around the selected image
  */
-Shape.prototype.draw = function () {
-    ctx.drawImage(this.img, this.x, this.y, this.w, this.h);
-
-    if(this.isSelected)
-    {
-        this.selectShape();
-        drawDragAnchor(this.x, this.y);
-        drawDragAnchor((this.x + this.w), this.y);
-        drawDragAnchor((this.x + this.w), (this.y + this.h));
-        drawDragAnchor(this.x, (this.y + this.h));
-        //if(this.isRemovedShape)
-        //{
-        //    this.clearShape();
-        //}
-
-
-    }
-
-
-};
-
-/**
- * used to create border around selected image
- */
-Shape.prototype.selectShape = function () {
+Shape.prototype.shapeSelect = function () {
     ctx.strokeRect(this.x, this.y, this.w, this.h);
-};
+
+}
 
 /**
- * used to get mouse click position on canvas
- * @return boolean value (either true or false)
+ * used to clear border around the image
  */
-Shape.prototype.amIClicked = function (xPost, yPost) {
-    return (xPost > this.x && xPost < (this.x + this.w) && yPost > this.y && yPost < (this.y + this.h));
-};
-
-
+Shape.prototype.shapeUnselect = function () {
+    ctx.clearRect(this.x - 1, this.y - 1, this.w + 2, this.h + 2);
+}
 
 /**
- * used to clear border around selected image
+ * used to return mouse click position lies within selected image
+ * @param xCord
+ * @param yCord
+ * @returns {boolean}
  */
-Shape.prototype.unselectShape = function () {
-    ctx.clearRect(this.x-1, this.y-1, this.w+2, this.h+2);
-};
-
-
-Shape.prototype.clearShape = function () {
-    ctx.clearRect(this.x-1, this.y-1, this.w+4, this.h+4);
-};
-
+Shape.prototype.amIClicked = function (xCord, yCord) {
+    return (xCord > this.x && xCord < (this.x + this.w) && yCord > this.y && yCord < (this.y + this.h));
+}
 
 /**
- * used to resize the image
- * @param {Number} startX:horizontal x coordinate
- * @param {Number} startY:horizontal x coordinate
- * @param {Number} draggingResizer
+ * used to resize shape
+ * @param xCord
+ * @param yCord
+ * @param draggingResizer
  */
-Shape.prototype.resizeShapeFunc = function (startX, startY,draggingResizer){
+Shape.prototype.resizeShapeFunc = function (xCord, yCord, draggingResizer) {
 
-    // resize the image
     switch (draggingResizer) {
         case 0:
             //top-left
-            this.x = startX;
-            this.w = (this.x + this.w) - startX;
-            this.y = startY;
-            this.h = (this.y + this.h) - startY;
+            this.x = xCord;
+           this.w = (this.x + this.w) - xCord;
+            this.y = yCord;
+            this.h = (this.y + this.h) - yCord;
             break;
         case 1:
             //top-right
-            this.y = startY;
-            this.w = startX - this.x;
-            this.h = (this.y + this.h) - startY;
+            imageY = yCord;
+            this.w = xCord - this.x;
+            this.h = (this.y + this.h) - yCord;
             break;
         case 2:
             //bottom-right
-            this.w = startX - this.x;
-            this.h = startY - this.y;
+            this.w = xCord - this.x;
+            this.h = yCord - this.y;
             break;
         case 3:
             //bottom-left
-            this.x = startX;
-            this.w = (this.x + this.w) - startX;
-            this.h = startY - this.y;
+            this.x = xCord;
+            this.w = (this.x + this.w) - xCord;
+            this.h = yCord - this.y;
             break;
     }
 
-    if (this.w < 25) {
-        this.w = 25;
+    if (this.w < 35) {
+        this.w = 35;
     }
-    if (this.h < 25) {
-        this.h = 25;
+    if (this.h < 35) {
+        this.h = 35;
     }
 
-};
-/**
- * used to resize the image
- * @param {Number} startX:horizontal x coordinate
- * @param {Number} startY:horizontal x coordinate
- * @param {Number}  resizerRadius:resize anchor radius
- */
+}
 
-Shape.prototype.anchorHitTest = function (startX, startY,resizerRadius) {
-    var newXCordAfterResizing, newYCordAfterResizing;
+Shape.prototype.anchorHit = function (xCord, yCord) {
+
+
+    var newXCord = xCord, newYCord = yCord;
 
     // top-left
-    newXCordAfterResizing = startX - this.x;
-    newYCordAfterResizing = startY - this.y;
-    if (newXCordAfterResizing * newXCordAfterResizing + newYCordAfterResizing * newYCordAfterResizing <= resizerRadius) {
+    if (newXCord > this.x && newXCord < (this.x + this.draggerSize) && newYCord > this.y && newYCord < (this.y + this.draggerSize)) {
         return (0);
     }
     // top-right
-    newXCordAfterResizing = startX - (this.x + this.w);
-    newYCordAfterResizing = startY - this.y;
-    if (newXCordAfterResizing * newXCordAfterResizing + newYCordAfterResizing * newYCordAfterResizing <= resizerRadius) {
+
+    if (newXCord > (this.x + this.w - this.draggerSize) && newXCord < (this.x + this.w) && newYCord > this.y && newYCord < this.y + this.draggerSize) {
         return (1);
     }
     // bottom-right
-    newXCordAfterResizing = startX - (this.x + this.w);
-    newYCordAfterResizing = startY - (this.y + this.h);
-    if (newXCordAfterResizing * newXCordAfterResizing + newYCordAfterResizing * newYCordAfterResizing <= resizerRadius) {
+    if (newXCord > (this.x + this.w - this.draggerSize) && newXCord < (this.x + this.w) && newYCord > (this.y + this.h - this.draggerSize) && newYCord < (this.y + this.h)) {
         return (2);
     }
     // bottom-left
-    newXCordAfterResizing = startX - this.x;
-    newYCordAfterResizing = startY - (this.y + this.h);
-    if (newXCordAfterResizing * newXCordAfterResizing + newYCordAfterResizing * newYCordAfterResizing <= resizerRadius) {
+
+    if (newXCord > this.x && newXCord < (this.x + this.draggerSize) && newYCord > (this.y + this.h - this.draggerSize) && newYCord < (this.y + this.h)) {
         return (3);
     }
     return (-1);
-};
 
-
-
+}

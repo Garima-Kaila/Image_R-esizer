@@ -1,302 +1,265 @@
 /**
- * Created by garima05 on 07-08-2016.
+ * Created by garima05 on 19-08-2016.
  */
 
-// methods, conditions, loops, complex logics, mathematics computations
-// no useless global variables
-//remove unused / commented code
-
-var canvas = document.getElementById("canImageResize");
-var ctx = canvas.getContext("2d");
-var imgCircle = new Image();
-imgCircle.src = "./images/circle.png";
-
-var imgRect = new Image();
-imgRect.src = "./images/rect.png";
-
-var imgTrang = new Image();
-imgTrang.src = "./images/triangle.png";
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext('2d');
 var offsetLeftX = canvas.offsetLeft;
 var offsetTopY = canvas.offsetTop;
-var shapeMoveObj = null;
-var radiusDragAnchor = 6;
-var resizerRadius = radiusDragAnchor * radiusDragAnchor;
-var draggingResizer;
+var imgrct = new Image();
+var rectimg = "./images/rect.png";
+imgrct.src = rectimg;
+var imgtrang = new Image();
+var trangimg = "./images/triangle.png";
+imgtrang.src = trangimg;
+var imgcir = new Image();
+var cirimg = "./images/circle.png";
+imgcir.src = cirimg;
 var shapes = [];
+var shapeIndex = null;
+var shapeImgObj = null;
+var isSelected = false;
+var draggingImage = false;
+var draggingResizer ;
+var anchorArea=100;
+/*var images = {
+ "rectangle":"./images/rect.png",
+ "circle":"./images/circle.png",
+ "triangle":"./images/triangle.png"
+ };
+
+
+ for(var imgkey in images){
+ var img= new Image();
+ img.src = shapeMoveObj[imgkey];
+ img.setAttribute("id","imgkey");
+ img.setAttribute("draggable","true");
+ img.setAttribute("ondragstart","drag(event)",false);
+ document.getElementById("divLeftPanel").appendChild(img);
+
+
+ }*/
 
 /**
- * used to draw circle on canvas
- *
+ * used to prevent default drop
+ * @param evnt
  */
-function drawCircle() {
-    var circle = new Shape();
-    circle.x = 100 * Math.random();
-    circle.y = 100 * Math.random();
-    circle.w = 100 * Math.random();
-    circle.h = 100 * Math.random();
-    circle.img = imgCircle;
-    shapes.push(circle);
-
-}
-/**
- * used to draw rectangle on the canvas
- *
- */
-function drawRectangle() {
-    var rect = new Shape();
-    rect.x = 100 * Math.random();
-    rect.y = 100 * Math.random();
-    rect.w = 100 * Math.random();
-    rect.h = 100 * Math.random();
-    rect.img = imgRect;
-    shapes.push(rect);
-}
-
-/**
- * used to draw triangle on the canvas
- *
- */
-function drawTriangle() {
-    var trang = new Shape();
-    trang.x = 100 * Math.random();
-    trang.y = 100 * Math.random();
-    trang.w = 100 * Math.random();
-    trang.h = 100 * Math.random();
-    trang.img = imgTrang;
-    shapes.push(trang);
+function allowDrop(evnt) {
+    evnt.preventDefault();
 }
 
 /**
- * Draw shapes
- *
+ * used to drag image
+ * @param evnt
  */
+function drag(evnt) {
+    evnt.dataTransfer.setData("text", evnt.target.id);
+}
+
+
+/**
+ * used to drop image on canvas
+ * @param evnt
+ */
+function drop(evnt) {
+    evnt.preventDefault();
+    var data = evnt.dataTransfer.getData("text");
+    var shape = new Shape();
+    if (data === "rectangle") {
+        shape.x = 100 * Math.random();
+        shape.y = 100 * Math.random();
+        shape.w = 100;
+        shape.h = 100;
+        shape.img = imgrct;
+    }
+    else if (data === "triangle") {
+        shape.x = 100 * Math.random();
+        shape.y = 100 * Math.random();
+        shape.w = 100;
+        shape.h = 100;
+        shape.img = imgtrang;
+    }
+    else if (data === "circle") {
+        shape.x = 100 * Math.random();
+        shape.y = 100 * Math.random();
+        shape.w = 100;
+        shape.h = 100;
+        shape.img = imgcir;
+    }
+
+
+    shapes.push(shape);
+    shape.draw();
+
+
+    evnt.target.appendChild(document.getElementById(data).cloneNode(true));
+}
+
+
 function drawShape() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //for (var idx = 0; idx < shapes.length; idx++) {
-    //    var shape = shapes[idx];
-        shapes.forEach(function(item,index){
-           var shape = item;
-
+    shapes.forEach(function (item) {
+        var shape = item;
         shape.draw();
-
-        }  );
-    saveCanvasData();
+    });
+    updateLocalStorage();
+//call drawshape again
     requestAnimationFrame(drawShape);
-
-    ctx.fillStyle = "brown";
-    ctx.fillRect(695, 10, 40, 40);
 
 
 }
 drawShape();
 
-
-function allowDrop(ev) {
-    ev.preventDefault();
-}
-
 /**
- * Used to drag Image from left image tool panel
- *
- */
-
-function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
-
-}
-
-/**
- * Used to drop Image on canvas
- *
- */
-function drop(ev) {
-    ev.preventDefault();
-    data = ev.dataTransfer.getData("text");
-
-    //for rectangle
-    if (data === "rectangle") {
-        drawRectangle();
-    }
-    //for circle
-    else if (data === "circle") {
-        drawCircle();
-    }
-
-    //for triangle
-    else if (data === "triangle") {
-        drawTriangle();
-    }
-
-    ev.target.appendChild(document.getElementById(data).cloneNode(true));
-}
-
-/**
- * used to draw drag anchor at four corners of the shape
- * @param {Number} x-coordinate of the center of the circle
- * @param {Number} y-coordinate of the center of the circle
- *
+ * used to draw draggable anchor around corner of image
+ * @param x
+ * @param y
  */
 function drawDragAnchor(x, y) {
-    ctx.beginPath();
-    ctx.arc(x, y, radiusDragAnchor, 0, 2 * Math.PI, false);
-    ctx.closePath();
-    ctx.fill();
+    ctx.fillRect(x, y, 10, 10);
+
+
 }
 
 canvas.addEventListener("mousedown", onMouseDownHandler, false);
 canvas.addEventListener("mousemove", onMouseMoveHandler, false);
-canvas.addEventListener("mouseup", onMouseUpHandler, false);
 canvas.addEventListener("mouseout", onMouseOutHandler, false);
-canvas.addEventListener('dblclick', ondblClickHandle, false);
+canvas.addEventListener("mouseup", onMouseUpHandler, false);
+
 
 /**
- * used to handle mousedown event which is binded with canvas
- * @param {event} mouse event
- *
- *
+ * used to handle mousedown event
+ * @param evnt
  */
 function onMouseDownHandler(evnt) {
-    var cordPosition = getPosition(evnt);
-    console.log("xcord:" + cordPosition.x);
 
-    //for (var idx = 0; idx < shapes.length; idx++) {
-    //    var shape = shapes[idx];
+    var position = getposition(evnt);
 
-    shapes.forEach(function(item,index){
+    shapes.forEach(function (item, index) {
         var shape = item;
-
-        //used to check mouse click coordinates lies within selected shape
-        if (shape.amIClicked(cordPosition.x, cordPosition.y)) {
-            shapeMoveObj = shape;
-
-            draggingResizer = shapeMoveObj.anchorHitTest(cordPosition.x, cordPosition.y, resizerRadius);
-        }
-
-        shape.unselectShape();
+        shape.shapeUnselect();
         shape.isSelected = false;
+    });
+    var clicked = shapes.find(function (shape, index) {
+        shapeIndex = index;
+        return shape.amIClicked(position.x, position.y);
+
+    });
+    console.log(shapeIndex);
+
+    if (clicked) {
+        clicked.shapeSelect();
+        shapeImgObj = clicked;
+        shapeImgObj.isSelected = true;
+        draggingImage = true;
+        draggingResizer = shapeImgObj.anchorHit(position.x,position.y);
+        console.log(draggingResizer);
+    }
 
 
-});
-    if (shapeMoveObj != null) {
-        shapeMoveObj.selectShape();
-        shapeMoveObj.isSelected = true;
-
+    else {
+        shapeImgObj = null;
+        shapeIndex = null;
+        draggingImage=false;
+        draggingResizer=-1
 
     }
 
-    //if (cordPosition.x > 695 && cordPosition.x < (695 + 40) && cordPosition.y > 10 && cordPosition.y < (10 + 40)) {
-    //    shapeMoveObj.selectShape();
-    //    if (shapeMoveObj.isSelected) {
-    //
-    //        shapeMoveObj.isRemoved = true;
-    //    }
-    //}
-}
 
-/**
- * used to get horizontal and vertical coordinates(x,y) on mouse click
- * @param {event} mouse event
- * @return {JSON object} x & y coordinate
+}
+/**.
+ *
+ *
+ *
+ * used to remove selected shape within canvas
+ *
  *
  */
 
-function getPosition(evnt) {
-    var position = {};
-    position.x = evnt.clientX - offsetLeftX;
-    position.y = evnt.clientY - offsetTopY;
-    return position;
-}
+function removeShape() {
+    if (shapeImgObj != null) {
+        shapeImgObj.isSelected = false;
 
-function ondblClickHandle(evnt) {
-
-    var cordPosition = getPosition(evnt);
-    //for (var idx = 0; idx < shapes.length; idx++) {
-    //    var shape = shapes[idx];
-
-        shapes.forEach(function(item,index){
-            var shape = item;
-        if (shape.amIClicked(cordPosition.x, cordPosition.y)) {
-            shapeMoveObj = shape;
+        var del = confirm("Do u want to deleteshape");
+        if (del === true) {
+            shapes.splice(shapeIndex, 1);
         }
-    });
-    if (shapeMoveObj != null) {
-        shapeMoveObj.selectShape();
-        shapeMoveObj.isSelected = true;
-
-        var del = confirm("Do u want to delete this shape !!");
-        if(del === true) {
-            shapes.pop()
-        }
-       // shapeMoveObj.isRemovedShape = true;
 
     }
+
 }
 /**
- * used to handle mousemove event which is binded with canvas
- * @param {event} mouse event
- *
- *
+ * used to get mouse click position
+ * @param evnt
+ * @returns {CordPosition object}: horizontal x and vertical y coordinate
+ */
+function getposition(evnt) {
+
+    var cordPosition = {};
+    cordPosition.x = evnt.pageX - offsetLeftX;
+    cordPosition.y = evnt.pageY - offsetTopY;
+
+    return cordPosition;
+
+
+}
+
+/**
+ * used to handle mouse event
+ * @param evnt
  */
 function onMouseMoveHandler(evnt) {
 
-    var cordPosition = getPosition(evnt);
+    var position = getposition(evnt);
+    if (draggingResizer > -1 && shapeImgObj != null) {
 
-    //used to redraw the shape with resizing anchors
-    if (draggingResizer > -1 && shapeMoveObj != null) {
-        var startX = cordPosition.x;
-        var startY = cordPosition.y;
-        shapeMoveObj.resizeShapeFunc(startX, startY, draggingResizer);
+        shapeImgObj.resizeShapeFunc(position.x, position.y, draggingResizer)
+
 
     }
 
-    // used to move the shape by the amount of the latest drag
-    else {
-        if (shapeMoveObj != null) {
-            shapeMoveObj.x = cordPosition.x;
-            shapeMoveObj.y = cordPosition.y;
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    else if(draggingImage){
+
+        if (shapeImgObj != null) {
+            shapeImgObj.x = position.x;
+            shapeImgObj.y = position.y;
+
+
         }
     }
-
 }
 
-/**
- * used to handle mouseup event which is binded with canvas
- * @param {event} mouse event
- *
- *
- */
-function onMouseUpHandler(evnt) {
-    draggingResizer = -1;
-    shapeMoveObj = null;
-}
-
-/**
- * used to handle mouseout event which is binded with canvas
- * @param {event} mouse event
- *
- *
- */
 function onMouseOutHandler(evnt) {
-
     onMouseUpHandler(evnt);
+
 }
 
-var savedData, shapesData;
 
+function onMouseUpHandler(evnt) {
+        draggingResizer=-1;
+    draggingImage = false;
+   // shapeImgObj = null;
+
+}
 
 /**
- * store data in local storage
- *
+ * used to save canvas' state in local storage
  */
-function saveCanvasData() {
+function updateLocalStorage() {
     localStorage.setItem("data", JSON.stringify(shapes));
-    savedData = localStorage.getItem("data");
-    shapesData = JSON.parse(savedData);
 }
 
-if (shapesData != undefined && shapesData != null) {
+function restoreSavedState(){
 
 
+}
+
+/**
+ * used to save canvas' state in png image form
+ */
+function saveData() {
+    var savedData = canvas.toDataURL();
+    window.open(savedData);
 }

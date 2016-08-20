@@ -1,56 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image Resizer</title>
-    <style>.header {
-        color: green;
+    <meta charset="UTF-8">
+    <title>Image resizere</title>
 
-    }
+    <style>
 
-    .leftPanel {
-        float: left;
-    }
-    .rightPanel {
-        float: right;
-        margin-top: 7px;
-        background-color: #e6eca9;
-    }
+        .hd{
+            text-align:center;
+            color:blueviolet;
+        }
 
-    .shapedrag {
-        color:black;
-        text-shadow: 3px 3px 3px green;
+        .divLeftPanel{
 
-    }
+            float:left;
+            margin-left:15%;
 
-    .hd {
-        color: green;
-        text-align: center;
-        font-weight: bold;
-        font-size: 40px;
-        text-shadow: 5px 5px 5px #FF0000;
-    }
+        }
+        .divRightPanel{
+            float:right;
+            margin-top:10px
+
+        }
+        body {
+            background-image: url("./images/bg2.jpg");
+        }
     </style>
+
+  <!--  <link rel="stylesheet" type="text/css" href="/css/imageStyle.css">-->
 </head>
-<body background="./images/bg2.jpg">
-<div class="header">
-    <header class="hd">Image Resizer Demo</header>
+
+
+
+<body>
+<div class=header">
+<header class="hd"><h1>Image Resizer</h1></header>
 </div>
 
-<div class="leftPanel">
-    <p>
-    <h3>Image Tools</h3></p>
-    <img id="rectangle" src="./images/rect.png" draggable="true" ondragstart="drag(event)"><br>
-    <img id="circle" src="./images/circle.png" draggable="true" ondragstart="drag(event)"><br>
-    <img id="triangle" src="./images/triangle.png" draggable="true" ondragstart="drag(event)">
-
+<div class="divLeftPanel"><h2>Image Tools</h2>
+    <img id="rectangle" src="./images/rect.png" draggable=true ondragstart="drag(event)"><br>
+    <img id="triangle" src="./images/triangle.png" draggable=true ondragstart="drag(event)"><br>
+    <img id="circle" src="./images/circle.png" draggable=true ondragstart="drag(event)"><br>
 </div>
-<div class="rightPanel">
-    <h3 class="shapedrag">Drag Shapes Here !!</h3>
-    <canvas id="canImageResize" width="800" height="500" style="border:1px solid" ondrop="drop(event)"
-            ondragover="allowDrop(event)">
-    </canvas>
+<div class="divRightPanel">
+    <h2>Drag shapes here!!
+        <button onclick="removeShape()">Remove shape</button>
+    <button onclick="saveData()">Download</button></h2>
+    <canvas id="canvas" width="800" height="500" style="border:1px solid" ondrop="drop(event)" ondragover="allowDrop(event)"></canvas>
 </div>
-<script src="js/shape.js"></script>
+<script src = "js/Shape.js"></script>
 <script src="js/main.js"></script>
 
 </body>

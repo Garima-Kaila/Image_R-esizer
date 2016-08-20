@@ -30,6 +30,7 @@ function Shape() {
     this.h = 0;
     this.img = 0;
     this.isSelected = false;
+    this.isRemovedShape = false;
 
 }
 
@@ -46,8 +47,14 @@ Shape.prototype.draw = function () {
         drawDragAnchor((this.x + this.w), this.y);
         drawDragAnchor((this.x + this.w), (this.y + this.h));
         drawDragAnchor(this.x, (this.y + this.h));
+        //if(this.isRemovedShape)
+        //{
+        //    this.clearShape();
+        //}
+
 
     }
+
 
 };
 
@@ -66,11 +73,18 @@ Shape.prototype.amIClicked = function (xPost, yPost) {
     return (xPost > this.x && xPost < (this.x + this.w) && yPost > this.y && yPost < (this.y + this.h));
 };
 
+
+
 /**
  * used to clear border around selected image
  */
 Shape.prototype.unselectShape = function () {
     ctx.clearRect(this.x-1, this.y-1, this.w+2, this.h+2);
+};
+
+
+Shape.prototype.clearShape = function () {
+    ctx.clearRect(this.x-1, this.y-1, this.w+4, this.h+4);
 };
 
 
@@ -154,5 +168,6 @@ Shape.prototype.anchorHitTest = function (startX, startY,resizerRadius) {
     }
     return (-1);
 };
+
 
 

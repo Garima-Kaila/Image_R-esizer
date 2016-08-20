@@ -19,7 +19,7 @@ imgTrang.src = "./images/triangle.png";
 var offsetLeftX = canvas.offsetLeft;
 var offsetTopY = canvas.offsetTop;
 var shapeMoveObj = null;
-var radiusDragAnchor = 8;
+var radiusDragAnchor = 6;
 var resizerRadius = radiusDragAnchor * radiusDragAnchor;
 var draggingResizer;
 var shapes = [];
@@ -39,9 +39,9 @@ function drawCircle() {
 
 }
 /**
-* used to draw rectangle on the canvas
-*
-*/
+ * used to draw rectangle on the canvas
+ *
+ */
 function drawRectangle() {
     var rect = new Shape();
     rect.x = 100 * Math.random();
@@ -73,13 +73,21 @@ function drawTriangle() {
 function drawShape() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var idx = 0; idx < shapes.length; idx++) {
-        var shape = shapes[idx]
+    //for (var idx = 0; idx < shapes.length; idx++) {
+    //    var shape = shapes[idx];
+        shapes.forEach(function(item,index){
+           var shape = item;
+
         shape.draw();
 
-    }
-    // call the drawShape function again!
+        }  );
+    saveCanvasData();
     requestAnimationFrame(drawShape);
+
+    ctx.fillStyle = "brown";
+    ctx.fillRect(695, 10, 40, 40);
+
+
 }
 drawShape();
 
@@ -120,7 +128,7 @@ function drop(ev) {
         drawTriangle();
     }
 
-    ev.target.appendChild(document.getElementById(data));
+    ev.target.appendChild(document.getElementById(data).cloneNode(true));
 }
 
 /**
@@ -140,7 +148,7 @@ canvas.addEventListener("mousedown", onMouseDownHandler, false);
 canvas.addEventListener("mousemove", onMouseMoveHandler, false);
 canvas.addEventListener("mouseup", onMouseUpHandler, false);
 canvas.addEventListener("mouseout", onMouseOutHandler, false);
-
+canvas.addEventListener('dblclick', ondblClickHandle, false);
 
 /**
  * used to handle mousedown event which is binded with canvas
@@ -152,8 +160,11 @@ function onMouseDownHandler(evnt) {
     var cordPosition = getPosition(evnt);
     console.log("xcord:" + cordPosition.x);
 
-    for (var idx = 0; idx < shapes.length; idx++) {
-        var shape = shapes[idx];
+    //for (var idx = 0; idx < shapes.length; idx++) {
+    //    var shape = shapes[idx];
+
+    shapes.forEach(function(item,index){
+        var shape = item;
 
         //used to check mouse click coordinates lies within selected shape
         if (shape.amIClicked(cordPosition.x, cordPosition.y)) {
@@ -165,11 +176,22 @@ function onMouseDownHandler(evnt) {
         shape.unselectShape();
         shape.isSelected = false;
 
-        }
+
+});
     if (shapeMoveObj != null) {
         shapeMoveObj.selectShape();
         shapeMoveObj.isSelected = true;
+
+
     }
+
+    //if (cordPosition.x > 695 && cordPosition.x < (695 + 40) && cordPosition.y > 10 && cordPosition.y < (10 + 40)) {
+    //    shapeMoveObj.selectShape();
+    //    if (shapeMoveObj.isSelected) {
+    //
+    //        shapeMoveObj.isRemoved = true;
+    //    }
+    //}
 }
 
 /**
@@ -186,8 +208,30 @@ function getPosition(evnt) {
     return position;
 }
 
+function ondblClickHandle(evnt) {
 
+    var cordPosition = getPosition(evnt);
+    //for (var idx = 0; idx < shapes.length; idx++) {
+    //    var shape = shapes[idx];
 
+        shapes.forEach(function(item,index){
+            var shape = item;
+        if (shape.amIClicked(cordPosition.x, cordPosition.y)) {
+            shapeMoveObj = shape;
+        }
+    });
+    if (shapeMoveObj != null) {
+        shapeMoveObj.selectShape();
+        shapeMoveObj.isSelected = true;
+
+        var del = confirm("Do u want to delete this shape !!");
+        if(del === true) {
+            shapes.pop()
+        }
+       // shapeMoveObj.isRemovedShape = true;
+
+    }
+}
 /**
  * used to handle mousemove event which is binded with canvas
  * @param {event} mouse event
@@ -239,18 +283,20 @@ function onMouseOutHandler(evnt) {
     onMouseUpHandler(evnt);
 }
 
-// Save canvas' Data as a data URL
-var canData = canvas.toDataURL();
-
-//sore data in local storage
-localStorage.setItem('data', canData);
+var savedData, shapesData;
 
 
-var savedData = localStorage.getItem('data');
-if(savedData != undefined && savedData!=null) {
-    var img= new Image();
-    img.src = savedData;
-    ctx.drawImage(img,550,500);
+/**
+ * store data in local storage
+ *
+ */
+function saveCanvasData() {
+    localStorage.setItem("data", JSON.stringify(shapes));
+    savedData = localStorage.getItem("data");
+    shapesData = JSON.parse(savedData);
+}
+
+if (shapesData != undefined && shapesData != null) {
 
 
 }

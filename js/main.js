@@ -6,39 +6,39 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 var offsetLeftX = canvas.offsetLeft;
 var offsetTopY = canvas.offsetTop;
-var imgrct = new Image();
-var rectimg = "./images/rect.png";
-imgrct.src = rectimg;
-var imgtrang = new Image();
-var trangimg = "./images/triangle.png";
-imgtrang.src = trangimg;
-var imgcir = new Image();
-var cirimg = "./images/circle.png";
-imgcir.src = cirimg;
+/*var imgrct = new Image();
+ var rectimg = "./images/rect.png";
+ imgrct.src = rectimg;
+ var imgtrang = new Image();
+ var trangimg = "./images/triangle.png";
+ imgtrang.src = trangimg;
+ var imgcir = new Image();
+ var cirimg = "./images/circle.png";
+ imgcir.src = cirimg;*/
 var shapes = [];
 var shapeIndex = null;
 var shapeImgObj = null;
 var isSelected = false;
 var draggingImage = false;
-var draggingResizer ;
-var anchorArea=100;
-/*var images = {
- "rectangle":"./images/rect.png",
- "circle":"./images/circle.png",
- "triangle":"./images/triangle.png"
- };
+var draggingResizer;
 
+var images = {
+    "rectangle": "./images/rect.png",
+    "circle": "./images/circle.png",
+    "triangle": "./images/triangle.png"
+};
 
- for(var imgkey in images){
- var img= new Image();
- img.src = shapeMoveObj[imgkey];
- img.setAttribute("id","imgkey");
- img.setAttribute("draggable","true");
- img.setAttribute("ondragstart","drag(event)",false);
- document.getElementById("divLeftPanel").appendChild(img);
+var preLoadedImages = {};
+for (var imgkey in images) {
+    var img = new Image();
+    img.src = images[imgkey];
+    preLoadedImages[imgkey] = img;
+    img.setAttribute("id", imgkey);
+    img.setAttribute("draggable", "true");
+    img.setAttribute("ondragstart", "drag(event)", false);
+    document.getElementById("divLeftPanel").appendChild(img);
 
-
- }*/
+}
 
 /**
  * used to prevent default drop
@@ -64,37 +64,22 @@ function drag(evnt) {
 function drop(evnt) {
     evnt.preventDefault();
     var data = evnt.dataTransfer.getData("text");
-    var shape = new Shape();
-    if (data === "rectangle") {
-        shape.x = 100 * Math.random();
-        shape.y = 100 * Math.random();
-        shape.w = 100;
-        shape.h = 100;
-        shape.img = imgrct;
-    }
-    else if (data === "triangle") {
-        shape.x = 100 * Math.random();
-        shape.y = 100 * Math.random();
-        shape.w = 100;
-        shape.h = 100;
-        shape.img = imgtrang;
-    }
-    else if (data === "circle") {
-        shape.x = 100 * Math.random();
-        shape.y = 100 * Math.random();
-        shape.w = 100;
-        shape.h = 100;
-        shape.img = imgcir;
-    }
+    if (data != null && preLoadedImages[data] != undefined) {
+        var shape = new Shape({
+            x: 100 * Math.random(),
+            y: 100 * Math.random(),
+            w: 100,
+            h: 100,
+            type: data
+        });
+        shape.img = preLoadedImages[data];
 
-
-    shapes.push(shape);
-    shape.draw();
-
+        shapes.push(shape);
+        shape.draw();
 
     evnt.target.appendChild(document.getElementById(data).cloneNode(true));
 }
-
+}
 
 function drawShape() {
 
@@ -109,7 +94,7 @@ function drawShape() {
 
 
 }
-drawShape();
+
 
 /**
  * used to draw draggable anchor around corner of image
@@ -153,7 +138,7 @@ function onMouseDownHandler(evnt) {
         shapeImgObj = clicked;
         shapeImgObj.isSelected = true;
         draggingImage = true;
-        draggingResizer = shapeImgObj.anchorHit(position.x,position.y);
+        draggingResizer = shapeImgObj.anchorHit(position.x, position.y);
         console.log(draggingResizer);
     }
 
@@ -161,8 +146,8 @@ function onMouseDownHandler(evnt) {
     else {
         shapeImgObj = null;
         shapeIndex = null;
-        draggingImage=false;
-        draggingResizer=-1
+        draggingImage = false;
+        draggingResizer = -1
 
     }
 
@@ -220,7 +205,7 @@ function onMouseMoveHandler(evnt) {
     }
 
 
-    else if(draggingImage){
+    else if (draggingImage) {
 
         if (shapeImgObj != null) {
             shapeImgObj.x = position.x;
@@ -238,9 +223,9 @@ function onMouseOutHandler(evnt) {
 
 
 function onMouseUpHandler(evnt) {
-        draggingResizer=-1;
+    draggingResizer = -1;
     draggingImage = false;
-   // shapeImgObj = null;
+    // shapeImgObj = null;
 
 }
 
@@ -248,13 +233,36 @@ function onMouseUpHandler(evnt) {
  * used to save canvas' state in local storage
  */
 function updateLocalStorage() {
+//    1)  set shape type , so that image can be reffered on restore.
+
     localStorage.setItem("data", JSON.stringify(shapes));
 }
+(function () {
 
-function restoreSavedState(){
+    var savedData = localStorage.getItem("data");
+    var data = JSON.parse(savedData);
+
+    if(data!= null ) {
+        data.forEach(function (shapeData) {
+            var shp = new Shape({
+                x: shapeData.x,
+                y: shapeData.y,
+                w: shapeData.w,
+                h: shapeData.h,
+                type: shapeData.type,
+            });
+
+            shp.img = preLoadedImages[shapeData.type];
+
+            shapes.push(shp);
+
+        })
+    }
+    //alert("Hello, I am restore");
+    requestAnimationFrame(drawShape);
 
 
-}
+})();
 
 /**
  * used to save canvas' state in png image form

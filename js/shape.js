@@ -9,12 +9,13 @@
  * @access public:draw();
  * @constructor
  */
-function Shape() {
-    this.x = 0;
-    this.y = 0;
-    this.w = 0;
-    this.h = 0;
+function Shape(obj) {
+    this.x = obj.x;
+    this.y = obj.y;
+    this.w = obj.w;
+    this.h = obj.h;
     this.img = 0;
+    this.type = obj.type;
     this.draggerSize = 10;
     this.isSelected = false;
 }

@@ -1,0 +1,35 @@
+body {
+    background-image: url("../images/bg2.jpg") ;
+    background-repeat: no-repeat;
+    background-size:100%;
+
+    border: 1px solid;
+}
+
+.header {
+    color: green;
+    text-align: center;
+    font-weight: bold;
+    font-size: 40px
+}
+
+.container {
+    width: 960px;
+    margin: auto;
+}
+
+.leftPanel {
+    float: left;
+    width: 25%;
+}
+
+.rightPanel {
+    float: right;
+    width: 75%;
+    margin-top: 7px;
+    background-color: #e6eca9;
+}
+
+.shapedrag {
+    color: darkorange;
+}

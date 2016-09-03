@@ -1,273 +1,240 @@
 /**
- * Created by garima05 on 19-08-2016.
+ * Created by garima05 on 07-08-2016.
  */
-
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext('2d');
-var offsetLeftX = canvas.offsetLeft;
-var offsetTopY = canvas.offsetTop;
-/*var imgrct = new Image();
- var rectimg = "./images/rect.png";
- imgrct.src = rectimg;
- var imgtrang = new Image();
- var trangimg = "./images/triangle.png";
- imgtrang.src = trangimg;
- var imgcir = new Image();
- var cirimg = "./images/circle.png";
- imgcir.src = cirimg;*/
-var shapes = [];
-var shapeIndex = null;
-var shapeImgObj = null;
-var isSelected = false;
-var draggingImage = false;
-var draggingResizer;
 
 var images = {
-    "rectangle": "./images/rect.png",
-    "circle": "./images/circle.png",
-    "triangle": "./images/triangle.png"
+    rectangle: "./images/rect.png",
+    circle: "./images/circle.png",
+    triangle: "./images/triangle.png"
 };
-
 var preLoadedImages = {};
-for (var imgkey in images) {
+
+for (var imgKey in images) {
     var img = new Image();
-    img.src = images[imgkey];
-    preLoadedImages[imgkey] = img;
-    img.setAttribute("id", imgkey);
-    img.setAttribute("draggable", "true");
-    img.setAttribute("ondragstart", "drag(event)", false);
-    document.getElementById("divLeftPanel").appendChild(img);
+    img.src = images[imgKey];
+    preLoadedImages[imgKey] = img;
+    img.setAttribute("id", imgKey);
+    img.setAttribute("draggable", true);
+    img.setAttribute('ondragstart', "drag(event)", false);
+    document.getElementById("tools").appendChild(img);
+}
+
+var canvas = document.getElementById("canImageResize");
+var ctx = canvas.getContext("2d");
+
+var offsetLeftX = canvas.offsetLeft;
+var offsetTopY = canvas.offsetTop;
+var selectedShapeIdx = null;
+var selectedShape = null;
+var selectedShapeCoordinateVariance;
+
+var draggingResizer;
+var shapes = [];
+
+/**
+ * Renders the shapes
+ *
+ */
+function render() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    /*for (var idx = 0; idx < shapes.length; idx++) {
+        var shape = shapes[idx]
+
+
+    }*/
+    shapes.forEach(function (shape) {
+        shape.draw();
+    });
+    updateInStorage();
+    // call the drawShape function again!
+    requestAnimationFrame(render);
+}
+
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+/**
+ * Used to drag Image from left image tool panel
+ *
+ */
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
 
 }
 
 /**
- * used to prevent default drop
- * @param evnt
+ * Used to drop Image on canvas
+ *
  */
-function allowDrop(evnt) {
-    evnt.preventDefault();
-}
-
-/**
- * used to drag image
- * @param evnt
- */
-function drag(evnt) {
-    evnt.dataTransfer.setData("text", evnt.target.id);
-}
-
-
-/**
- * used to drop image on canvas
- * @param evnt
- */
-function drop(evnt) {
-    evnt.preventDefault();
-    var data = evnt.dataTransfer.getData("text");
-    if (data != null && preLoadedImages[data] != undefined) {
+function drop(ev) {
+    ev.preventDefault();
+    var type = ev.dataTransfer.getData("text");
+    if (images[type]) {
         var shape = new Shape({
             x: 100 * Math.random(),
             y: 100 * Math.random(),
             w: 100,
             h: 100,
-            type: data
+            type: type
         });
-        shape.img = preLoadedImages[data];
-
         shapes.push(shape);
-        shape.draw();
-
-    evnt.target.appendChild(document.getElementById(data).cloneNode(true));
+    }
 }
-}
-
-function drawShape() {
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    shapes.forEach(function (item) {
-        var shape = item;
-        shape.draw();
-    });
-    updateLocalStorage();
-//call drawshape again
-    requestAnimationFrame(drawShape);
-
-
-}
-
 
 /**
- * used to draw draggable anchor around corner of image
- * @param x
- * @param y
+ * used to remove the selected shape
+ *
  */
-function drawDragAnchor(x, y) {
-    ctx.fillRect(x, y, 10, 10);
-
-
+function removeSelectedImage() {
+    if (selectedShapeIdx != null) {
+        if(confirm("Are you sure you want to remove it?")){
+            shapes.splice(selectedShapeIdx, 1);
+        }
+    }
 }
+
 
 canvas.addEventListener("mousedown", onMouseDownHandler, false);
 canvas.addEventListener("mousemove", onMouseMoveHandler, false);
-canvas.addEventListener("mouseout", onMouseOutHandler, false);
 canvas.addEventListener("mouseup", onMouseUpHandler, false);
+canvas.addEventListener("mouseout", onMouseOutHandler, false);
 
 
 /**
- * used to handle mousedown event
- * @param evnt
+ * used to handle mousedown event which is binded with canvas
+ * @param {event} mouse event
+ *
+ *
  */
 function onMouseDownHandler(evnt) {
+    var cordPosition = getPosition(evnt);
+    console.log("xcord:" + cordPosition.x);
 
-    var position = getposition(evnt);
-
-    shapes.forEach(function (item, index) {
-        var shape = item;
-        shape.shapeUnselect();
-        shape.isSelected = false;
+    shapes.forEach(function (shape) {
+        shape.unselectShape();
     });
-    var clicked = shapes.find(function (shape, index) {
-        shapeIndex = index;
-        return shape.amIClicked(position.x, position.y);
 
+    //used to check mouse click coordinates lies within selected shape
+    var clickedShape = shapes.find(function (shape, idx) {
+        selectedShapeIdx = idx;
+        return shape.amIClicked(cordPosition.x, cordPosition.y);
     });
-    console.log(shapeIndex);
-
-    if (clicked) {
-        clicked.shapeSelect();
-        shapeImgObj = clicked;
-        shapeImgObj.isSelected = true;
-        draggingImage = true;
-        draggingResizer = shapeImgObj.anchorHit(position.x, position.y);
-        console.log(draggingResizer);
+    if (clickedShape) {
+        console.log("clickedShape", clickedShape);
+        clickedShape.selectShape();
+        selectedShape = clickedShape;
+        selectedShapeCoordinateVariance = {x: cordPosition.x - clickedShape.x, y: cordPosition.y - clickedShape.y}
+    } else {
+        selectedShapeCoordinateVariance = null;
+        selectedShape = null;
+        selectedShapeIdx = null;
     }
-
-
-    else {
-        shapeImgObj = null;
-        shapeIndex = null;
-        draggingImage = false;
-        draggingResizer = -1
-
-    }
-
-
-}
-/**.
- *
- *
- *
- * used to remove selected shape within canvas
- *
- *
- */
-
-function removeShape() {
-    if (shapeImgObj != null) {
-        shapeImgObj.isSelected = false;
-
-        var del = confirm("Do u want to deleteshape");
-        if (del === true) {
-            shapes.splice(shapeIndex, 1);
-        }
-
-    }
-
-}
-/**
- * used to get mouse click position
- * @param evnt
- * @returns {CordPosition object}: horizontal x and vertical y coordinate
- */
-function getposition(evnt) {
-
-    var cordPosition = {};
-    cordPosition.x = evnt.pageX - offsetLeftX;
-    cordPosition.y = evnt.pageY - offsetTopY;
-
-    return cordPosition;
-
 
 }
 
 /**
- * used to handle mouse event
- * @param evnt
+ * used to get horizontal and vertical coordinates(x,y) on mouse click
+ * @param {event} mouse event
+ * @return {JSON object} x & y coordinate
+ *
+ */
+
+function getPosition(evnt) {
+    var position = {};
+    position.x = evnt.clientX - offsetLeftX;
+    position.y = evnt.clientY - offsetTopY;
+    return position;
+}
+
+
+/**
+ * used to handle mousemove event which is binded with canvas
+ * @param {event} mouse event
+ *
+ *
  */
 function onMouseMoveHandler(evnt) {
 
-    var position = getposition(evnt);
-    if (draggingResizer > -1 && shapeImgObj != null) {
+    var cordPosition = getPosition(evnt);
+    //updateAllShapes();
+    if (selectedShape != null) {
+        if (draggingResizer === -1) {
+            draggingResizer = selectedShape.anchorHitTest(cordPosition.x, cordPosition.y);
+        }
 
-        shapeImgObj.resizeShapeFunc(position.x, position.y, draggingResizer)
-
-
-    }
-
-
-    else if (draggingImage) {
-
-        if (shapeImgObj != null) {
-            shapeImgObj.x = position.x;
-            shapeImgObj.y = position.y;
-
-
+        if (draggingResizer > -1) {
+            //used to redraw the shape with resizing anchors
+            selectedShape.resizeShapeFunc(cordPosition.x, cordPosition.y, draggingResizer);
+        } else {
+            // used to move the shape by the amount of the latest drag
+            selectedShape.x = cordPosition.x - selectedShapeCoordinateVariance.x;
+            selectedShape.y = cordPosition.y - selectedShapeCoordinateVariance.y;
         }
     }
 }
 
-function onMouseOutHandler(evnt) {
-    onMouseUpHandler(evnt);
 
-}
-
-
+/**
+ * used to handle mouseup event which is binded with canvas
+ * @param {event} mouse event
+ *
+ *
+ */
 function onMouseUpHandler(evnt) {
     draggingResizer = -1;
-    draggingImage = false;
-    // shapeImgObj = null;
+    var cordPosition = getPosition(evnt);
+    if (selectedShape != null && !selectedShape.amIClicked(cordPosition.x, cordPosition.y)) {
+        selectedShapeIdx = null;
+    }
+    selectedShape = null;
+    selectedShapeCoordinateVariance = null;
 
 }
 
 /**
- * used to save canvas' state in local storage
+ * used to handle mouseout event which is binded with canvas
+ * @param {event} mouse event
+ *
+ *
  */
-function updateLocalStorage() {
-//    1)  set shape type , so that image can be reffered on restore.
+function onMouseOutHandler(evnt) {
 
-    localStorage.setItem("data", JSON.stringify(shapes));
+    onMouseUpHandler(evnt);
 }
-(function () {
 
-    var savedData = localStorage.getItem("data");
-    var data = JSON.parse(savedData);
 
-    if(data!= null ) {
-        data.forEach(function (shapeData) {
-            var shp = new Shape({
-                x: shapeData.x,
-                y: shapeData.y,
-                w: shapeData.w,
-                h: shapeData.h,
-                type: shapeData.type,
-            });
-
-            shp.img = preLoadedImages[shapeData.type];
-
-            shapes.push(shp);
-
+//sore data in local storage
+function updateInStorage() {
+    var data = JSON.stringify(shapes);
+    localStorage.setItem('data', data);
+}
+function restoreFromStorage() {
+    var savedData = localStorage.getItem('data');
+    var savedShapes = JSON.parse(savedData);
+    if (savedShapes) {
+        savedShapes.forEach(function (shape, idx) {
+            if (shape.isSelected) {
+                selectedShapeIdx = idx;
+            }
+            shapes.push(new Shape(shape));
         })
     }
-    //alert("Hello, I am restore");
-    requestAnimationFrame(drawShape);
+    requestAnimationFrame(render);
 
-
-})();
-
-/**
- * used to save canvas' state in png image form
- */
-function saveData() {
-    var savedData = canvas.toDataURL();
-    window.open(savedData);
 }
+setTimeout(restoreFromStorage, 100)
+
+// Save canvas' Data as a data URL
+function downloadAsImage() {
+    var canData = canvas.toDataURL();
+    window.open(canData);
+}
+
+
+
+
+

@@ -1,53 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Image resizere</title>
-
-    <style>
-
-        .hd{
-            text-align:center;
-            color:blueviolet;
-        }
-
-        .divLeftPanel{
-
-            float:left;
-            margin-left:15%;
-            width: 20%;
-
-        }
-        .divRightPanel{
-            float:right;
-            margin-top:10px
-
-        }
-        body {
-            background-image: url("./images/bg2.jpg");
-        }
-    </style>
-
-  <!--  <link rel="stylesheet" type="text/css" href="/css/imageStyle.css">-->
+    <title>Image Resizer</title>
+    <link rel="stylesheet" type="text/css" href="./css/app.css">
 </head>
-
-
-
 <body>
-<div class=header">
-<header class="hd"><h1>Image Resizer</h1></header>
+<header class="header">Image Resizer Demo</header>
+<div class="container">
+    <div class="leftPanel">
+        <p>
+        <h3>Image Tools</h3>
+        </p>
+        <div id="tools"></div>
+    </div>
+    <div class="rightPanel">
+        <h3 class="shapedrag">Drag Shapes Here !!
+            <button onclick="removeSelectedImage()">Remove Selected Image</button>
+            <button onclick="downloadAsImage()">Download</button>
+        </h3>
+        <canvas id="canImageResize" width="700" height="700" style="border:1px solid" ondrop="drop(event)"
+                ondragover="allowDrop(event)">
+        </canvas>
+    </div>
 </div>
-
-<div class="divLeftPanel" id="divLeftPanel"><h2>Image Tools</h2>
-
-</div>
-<div class="divRightPanel">
-    <h2>Drag shapes here!!
-        <button onclick="removeShape()">Remove shape</button>
-    <button onclick="saveData()">Download</button></h2>
-    <canvas id="canvas" width="800" height="500" style="border:1px solid" ondrop="drop(event)" ondragover="allowDrop(event)"></canvas>
-</div>
-<script src = "js/Shape.js"></script>
+<script src="js/shape.js"></script>
 <script src="js/main.js"></script>
 
 </body>
